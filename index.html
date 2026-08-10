@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f3f3f0" />
+    <meta
+      name="description"
+      content="在浏览器中查看、搜索、分类并预览本机安装的字体。"
+    />
+    <title>本机字体索引 · Local Type</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="返回顶部">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>LOCAL TYPE</span>
+        <span class="brand-cn">本机字体索引</span>
+      </a>
+      <div class="topbar-actions">
+        <div class="scan-state" aria-live="polite">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="scanStateText">等待读取</span>
+        </div>
+        <button class="button button-dark" id="scanButton" type="button">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7" />
+          </svg>
+          <span>读取本机字体</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero page-shell">
+        <div class="eyebrow"><span>TYPE SPECIMEN</span><span>01 — LOCAL</span></div>
+        <div class="hero-copy">
+          <h1>字体，不该只<br />躺在系统里。</h1>
+          <p>输入一句话，一次看完本机所有字体。按家族、字重、形态与语言整理。</p>
+        </div>
+
+        <div class="preview-console">
+          <label class="sr-only" for="previewInput">预览文字</label>
+          <textarea
+            id="previewInput"
+            rows="2"
+            maxlength="120"
+            spellcheck="false"
+            placeholder="输入想预览的文字"
+          >爱l</textarea>
+          <div class="preview-controls">
+            <div class="size-control">
+              <label for="fontSize">字号</label>
+              <input id="fontSize" type="range" min="24" max="112" step="2" value="58" />
+              <output id="fontSizeValue" for="fontSize">58 px</output>
+            </div>
+            <div class="segmented" aria-label="显示方式">
+              <button class="is-active" data-view="families" type="button">按家族</button>
+              <button data-view="faces" type="button">全部字面</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats page-shell" aria-label="字体统计">
+        <article>
+          <span class="stat-value" id="familyCount">—</span>
+          <span class="stat-label">字体家族</span>
+        </article>
+        <article>
+          <span class="stat-value" id="faceCount">—</span>
+          <span class="stat-label">全部字面</span>
+        </article>
+        <article>
+          <span class="stat-value" id="boldCount">—</span>
+          <span class="stat-label">粗体字面</span>
+        </article>
+        <article>
+          <span class="stat-value" id="cjkCount">—</span>
+          <span class="stat-label">中文 / CJK</span>
+        </article>
+        <article>
+          <span class="stat-value stat-time" id="lastScan">未扫描</span>
+          <span class="stat-label">最近更新</span>
+        </article>
+      </section>
+
+      <section class="workspace page-shell">
+        <aside class="filters" aria-label="字体筛选">
+          <div class="filter-heading">
+            <span>筛选</span>
+            <button id="resetFilters" type="button">全部重置</button>
+          </div>
+
+          <div class="search-box">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-4-4" />
+            </svg>
+            <label class="sr-only" for="fontSearch">搜索字体</label>
+            <input id="fontSearch" type="search" placeholder="字体、家族或样式" autocomplete="off" />
+            <kbd>⌘ K</kbd>
+          </div>
+
+          <div class="filter-section">
+            <button class="filter-section-title" type="button" aria-expanded="true">
+              <span>形态</span><span>−</span>
+            </button>
+            <div class="filter-options" id="shapeFilters"></div>
+          </div>
+
+          <div class="filter-section">
+            <button class="filter-section-title" type="button" aria-expanded="true">
+              <span>语言 / 字符</span><span>−</span>
+            </button>
+            <div class="filter-options" id="languageFilters"></div>
+          </div>
+
+          <div class="analysis-note">
+            <div class="analysis-line">
+              <span>字体特征分析</span>
+              <span id="analysisPercent">0%</span>
+            </div>
+            <div class="progress-track"><span id="analysisProgress"></span></div>
+            <p>根据 OpenType 元数据渐进识别衬线、等宽与语言覆盖。</p>
+          </div>
+        </aside>
+
+        <div class="catalog">
+          <div class="catalog-toolbar">
+            <div>
+              <p class="catalog-kicker">FONT CATALOG</p>
+              <h2><span id="resultCount">0</span> 个结果</h2>
+            </div>
+            <label class="sort-select">
+              <span>排序</span>
+              <select id="sortSelect">
+                <option value="name-asc">名称 A—Z</option>
+                <option value="name-desc">名称 Z—A</option>
+                <option value="faces-desc">字面数量</option>
+                <option value="weight-desc">字重由粗到细</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="empty-state" id="emptyState">
+            <div class="empty-glyph" aria-hidden="true">字</div>
+            <h3>让浏览器认识你的字体</h3>
+            <p>点击“读取本机字体”，并在浏览器提示中允许访问。字体数据只在本机处理。</p>
+            <button class="button button-accent" id="emptyScanButton" type="button">读取本机字体</button>
+          </div>
+
+          <div class="font-grid" id="fontGrid" aria-live="polite"></div>
+          <button class="load-more" id="loadMoreButton" type="button" hidden>
+            加载更多
+            <span id="loadMoreCount"></span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer page-shell">
+      <span>LOCAL TYPE INDEX</span>
+      <span>字体不会离开这台设备</span>
+      <span id="browserSupport">正在检测浏览器能力…</span>
+    </footer>
+
+    <dialog class="font-dialog" id="fontDialog">
+      <form method="dialog" class="dialog-shell">
+        <button class="dialog-close" value="close" aria-label="关闭" type="submit">×</button>
+        <div id="dialogContent"></div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
